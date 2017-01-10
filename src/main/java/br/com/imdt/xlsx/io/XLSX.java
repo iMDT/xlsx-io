@@ -1,4 +1,4 @@
-package br.com.imdt.os.io;
+package br.com.imdt.xlsx.io;
 
 /**
  * Main class that handle calls to iMDT XLSX/IO
