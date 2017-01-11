@@ -55,12 +55,12 @@ public class ContentHandlerImpl extends DefaultHandler {
     /**
      * List of raw values presented in the row.
      */
-    private final ArrayList<String> rawValues;
+    private final NotNullList rawValues;
 
     /**
      * List of formatted values presented in the row.
      */
-    private final ArrayList<String> formattedValues;
+    private final NotNullList formattedValues;
 
     /**
      * Inform when the element is a cell value.
@@ -203,8 +203,8 @@ public class ContentHandlerImpl extends DefaultHandler {
         this.sheetNumber = sheetNumber;
         this.dataCallback = dataCallback;
         this.currentCol = -1;
-        this.rawValues = new ArrayList<String>();
-        this.formattedValues = new ArrayList<String>();
+        this.rawValues = new NotNullList();
+        this.formattedValues = new NotNullList();
         this.dataTypeService = new XlsxDataTypeServiceImpl();
         if (dataHandler == null) {
             this.dataHandler = new DefaultDataHandlerImpl(rawValues, formattedValues, sharedStringsTable);
