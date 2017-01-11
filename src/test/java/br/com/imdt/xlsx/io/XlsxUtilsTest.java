@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author imdt-klaus
+ * @author <a href="github.com/klauswk">Klaus Klein</a>
  */
 public class XlsxUtilsTest {
     

@@ -1,5 +1,6 @@
 package br.com.imdt.xlsx.io;
 
+import br.com.imdt.xlsx.io.impl.ContentHandlerImpl;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -21,10 +22,11 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 /**
+ * This class is used to stream all sheets in a document, or a specific sheet
  *
- * @author imdt-klaus
+ * @author <a href="github.com/klauswk">Klaus Klein</a>
  */
-public class XlsxStreamer implements Closeable{
+public class XlsxStreamer implements Closeable {
 
     private DataCallback dataCallback;
     private OPCPackage pack;
@@ -48,6 +50,14 @@ public class XlsxStreamer implements Closeable{
         this.pack = OPCPackage.open(inputStream);
     }
 
+    /**
+     * Stream all sheets presented in the document.
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws OpenXML4JException
+     * @throws ParserConfigurationException
+     */
     public void stream() throws IOException, SAXException, OpenXML4JException, ParserConfigurationException {
         ReadOnlySharedStringsTable sharedStringsTable = new ReadOnlySharedStringsTable(pack);
         XSSFReader streamer = new XSSFReader(pack);
@@ -57,13 +67,13 @@ public class XlsxStreamer implements Closeable{
         int sheetNumber = 1;
         while (sheetIterator.hasNext()) {
             InputStream stream = sheetIterator.next();
-            processSheet(styles, sharedStringsTable, stream,sheetNumber);
+            processSheet(styles, sharedStringsTable, stream, sheetNumber);
             stream.close();
             sheetNumber++;
         }
         dataCallback.onEnd();
     }
-    
+
     /**
      * Parses and shows the content of one sheet using the specified styles and
      * shared-strings tables.
@@ -82,7 +92,7 @@ public class XlsxStreamer implements Closeable{
         SAXParserFactory saxFactory = SAXParserFactory.newInstance();
         SAXParser saxParser = saxFactory.newSAXParser();
         XMLReader sheetParser = saxParser.getXMLReader();
-        ContentHandler handler = new ContentHandlerImpl(sheetNumber,dataCallback,styles, strings,null);
+        ContentHandler handler = new ContentHandlerImpl(sheetNumber, dataCallback, styles, strings, null);
         sheetParser.setContentHandler(handler);
         sheetParser.parse(sheetSource);
     }

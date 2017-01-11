@@ -1,5 +1,9 @@
-package br.com.imdt.xlsx.io;
+package br.com.imdt.xlsx.io.impl;
 
+import br.com.imdt.xlsx.io.DataCallback;
+import br.com.imdt.xlsx.io.DataHandler;
+import br.com.imdt.xlsx.io.XlsxDataType;
+import br.com.imdt.xlsx.io.XlsxDataTypeService;
 import java.util.ArrayList;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
@@ -11,7 +15,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  *
- * @author imdt-klaus
+ * @author <a href="github.com/klauswk">Klaus Klein</a>
  */
 public class ContentHandlerImpl extends DefaultHandler {
 
@@ -84,15 +88,17 @@ public class ContentHandlerImpl extends DefaultHandler {
      * An handler to send when readed cell data is ready to be used.
      */
     private final DataHandler dataHandler;
+    
+    private final XlsxDataTypeService dataTypeService;
 
     @Override
     public void startElement(String uri, String localName, String name,
             Attributes attributes) throws SAXException {
 
-        if (XlsxDataType.isTextElement(name, isInlineString)) {
+        if (dataTypeService.isTextElement(name, isInlineString)) {
             isCellValue = true;
             bufferedReadedValue.setLength(0);
-        } else if (XlsxDataType.isHeaderOrFooter(name)) {
+        } else if (dataTypeService.isHeaderOrFooter(name)) {
             isFooterOrHeader = true;
 
         } else if (XlsxDataType.INLINE_STRING_OUTER_TAG.getCellType().equals(name)) {
@@ -104,7 +110,7 @@ public class ContentHandlerImpl extends DefaultHandler {
             String cellType = attributes.getValue("t");
             String cellStyleStr = attributes.getValue("s");
 
-            xlsxDataType = XlsxDataType.getByCellType(cellType);
+            xlsxDataType = dataTypeService.getByCellType(cellType);
 
             if (cellStyleStr != null) {
                 int styleIndex = Integer.parseInt(cellStyleStr);
@@ -143,7 +149,7 @@ public class ContentHandlerImpl extends DefaultHandler {
                     dataHandler.handleFormula(xSSFCellStyle, bufferedReadedValue.toString());
                     break;
 
-                case INLINESTR:
+                case INLINE_STRING:
                     dataHandler.handleInlineString(xSSFCellStyle, bufferedReadedValue.toString());
                     break;
 
@@ -199,6 +205,7 @@ public class ContentHandlerImpl extends DefaultHandler {
         this.currentCol = -1;
         this.rawValues = new ArrayList<String>();
         this.formattedValues = new ArrayList<String>();
+        this.dataTypeService = new XlsxDataTypeServiceImpl();
         if (dataHandler == null) {
             this.dataHandler = new DefaultDataHandlerImpl(rawValues, formattedValues, sharedStringsTable);
         }else{

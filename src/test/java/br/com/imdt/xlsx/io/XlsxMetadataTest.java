@@ -17,7 +17,7 @@ import org.xml.sax.SAXException;
 
 /**
  *
- * @author imdt-klaus
+ * @author <a href="github.com/klauswk">Klaus Klein</a>
  */
 public class XlsxMetadataTest {
 

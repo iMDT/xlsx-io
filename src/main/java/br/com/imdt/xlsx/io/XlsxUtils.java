@@ -3,7 +3,7 @@ package br.com.imdt.xlsx.io;
 /**
  * Util class used in {@link XlsxMetadata} and {@link XlsxStreamer}
  * 
- * @author imdt-klaus
+ * @author <a href="github.com/klauswk">Klaus Klein</a>
  */
 public abstract class XlsxUtils {
 

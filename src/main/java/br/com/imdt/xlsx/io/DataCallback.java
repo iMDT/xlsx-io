@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * This interface is responsible for deliver the data when streaming over the xlsx
  * 
- * @author imdt-klaus
+ * @author <a href="github.com/klauswk">Klaus Klein</a>
  */
 public interface DataCallback {
     

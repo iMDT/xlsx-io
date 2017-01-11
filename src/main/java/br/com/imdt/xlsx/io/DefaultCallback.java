@@ -2,7 +2,7 @@ package br.com.imdt.xlsx.io;
 
 /**
  *
- * @author imdt-klaus
+ * @author <a href="github.com/klauswk">Klaus Klein</a>
  */
 public abstract class DefaultCallback implements DataCallback{
 

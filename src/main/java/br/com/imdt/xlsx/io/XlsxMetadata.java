@@ -17,7 +17,7 @@ import org.xml.sax.SAXException;
 /**
  * Responsible for get the Xlsx Metadata
  *
- * @author imdt-klaus
+ * @author <a href="github.com/klauswk">Klaus Klein</a>
  */
 public class XlsxMetadata implements Closeable {
 

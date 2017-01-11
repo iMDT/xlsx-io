@@ -5,7 +5,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 /**
  * Deliver the data when its detected on {@link ContentHandlerImpl}
  *
- * @author imdt-klaus
+ * @author <a href="github.com/klauswk">Klaus Klein</a>
  */
 public interface DataHandler {
 
