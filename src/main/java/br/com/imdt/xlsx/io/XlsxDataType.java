@@ -28,6 +28,7 @@ public enum XlsxDataType {
     REFERENCE("r"),
     DATATYPE("t"),
     FORMULA_FIELD("f"),
+    INLINE_STRING_OUTER_TAG("is"),
     CELL_VALUE("v"),
     CELL("c");
 

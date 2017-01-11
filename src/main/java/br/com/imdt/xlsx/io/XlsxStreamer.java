@@ -82,7 +82,7 @@ public class XlsxStreamer implements Closeable{
         SAXParserFactory saxFactory = SAXParserFactory.newInstance();
         SAXParser saxParser = saxFactory.newSAXParser();
         XMLReader sheetParser = saxParser.getXMLReader();
-        ContentHandler handler = new ContentHandlerImpl(sheetNumber,dataCallback,styles, strings);
+        ContentHandler handler = new ContentHandlerImpl(sheetNumber,dataCallback,styles, strings,null);
         sheetParser.setContentHandler(handler);
         sheetParser.parse(sheetSource);
     }
