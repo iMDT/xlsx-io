@@ -1,6 +1,7 @@
 # xlsx-io
 XLSX Input/Output library
 
+<img src="https://travis-ci.org/iMDT/xlsx-io.svg?branch=master" />
 #Oracle support
 To support Oracle database, you need to manually download ojdbc7.jar from Oracle's website (http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html)
 
