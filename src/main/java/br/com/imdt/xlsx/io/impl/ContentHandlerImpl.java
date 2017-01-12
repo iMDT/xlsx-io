@@ -88,7 +88,7 @@ public class ContentHandlerImpl extends DefaultHandler {
      * An handler to send when readed cell data is ready to be used.
      */
     private final DataHandler dataHandler;
-    
+
     private final XlsxDataTypeService dataTypeService;
 
     @Override
@@ -109,7 +109,7 @@ public class ContentHandlerImpl extends DefaultHandler {
             cellReference = attributes.getValue("r");
             String cellType = attributes.getValue("t");
             String cellStyleStr = attributes.getValue("s");
-
+            
             xlsxDataType = dataTypeService.getByCellType(cellType);
 
             if (cellStyleStr != null) {
@@ -208,7 +208,7 @@ public class ContentHandlerImpl extends DefaultHandler {
         this.dataTypeService = new XlsxDataTypeServiceImpl();
         if (dataHandler == null) {
             this.dataHandler = new DefaultDataHandlerImpl(rawValues, formattedValues, sharedStringsTable);
-        }else{
+        } else {
             this.dataHandler = dataHandler;
         }
     }

@@ -7,7 +7,7 @@ import static br.com.imdt.xlsx.io.XlsxDataType.FIRST_FOOTER;
 import static br.com.imdt.xlsx.io.XlsxDataType.FIRST_HEADER;
 import static br.com.imdt.xlsx.io.XlsxDataType.ODD_FOOTER;
 import static br.com.imdt.xlsx.io.XlsxDataType.ODD_HEADER;
-import static br.com.imdt.xlsx.io.XlsxDataType.SHEETDATA;
+import static br.com.imdt.xlsx.io.XlsxDataType.NUMBER;
 import br.com.imdt.xlsx.io.XlsxDataTypeService;
 
 /**
@@ -23,7 +23,7 @@ public class XlsxDataTypeServiceImpl implements XlsxDataTypeService {
                 return type;
             }
         }
-        return SHEETDATA;
+        return NUMBER;
     }
 
     @Override

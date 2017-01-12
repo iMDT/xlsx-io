@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
-import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
@@ -31,7 +30,6 @@ public class DefaultDataHandlerImpl implements DataHandler {
         this.formatter = new DataFormatter();
     }
 
-    
     @Override
     public void handleBoolean(XSSFCellStyle style, String value) {
         char first = value.charAt(0);
@@ -79,16 +77,20 @@ public class DefaultDataHandlerImpl implements DataHandler {
     @Override
     public void handleNumber(XSSFCellStyle style, String number) {
         rawValues.add(number);
-        short formatIndex = style.getDataFormat();
-        String formatString = style.getDataFormatString();
-        if (formatString == null) {
-            formatString = BuiltinFormats.getBuiltinFormat(formatIndex);
-        }
-        if (formatString != null) {
-            formattedValues.add(formatter.formatRawCellContents(Double.parseDouble(number), formatIndex, formatString));
-            if (formatString.contentEquals("D/M/YYYY")) {
-                rawValues.add(formatter.formatRawCellContents(Double.parseDouble(number), formatIndex, formatString));
+        if (style != null) {
+            short formatIndex = style.getDataFormat();
+            String formatString = style.getDataFormatString();
+            if (formatString == null) {
+                formatString = BuiltinFormats.getBuiltinFormat(formatIndex);
             }
+            if (formatString != null) {
+                formattedValues.add(formatter.formatRawCellContents(Double.parseDouble(number), formatIndex, formatString));
+                if (formatString.contentEquals("D/M/YYYY")) {
+                    rawValues.add(formatter.formatRawCellContents(Double.parseDouble(number), formatIndex, formatString));
+                }
+            }
+        }else{
+           formattedValues.add(number);
         }
     }
 
