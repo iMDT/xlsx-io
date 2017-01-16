@@ -61,63 +61,6 @@ public class XlsxMetadata implements Closeable {
     }
 
     /**
-     * Fetch the {@link SheetIterator} by its sheetName
-     *
-     * @param sheetName
-     * @return The sheet if found, null otherwise.
-     * @throws IOException
-     * @throws SAXException
-     * @throws OpenXML4JException
-     */
-    public SheetIterator getSheetByName(String sheetName) throws IOException, SAXException, OpenXML4JException {
-        if (sheetName == null) {
-            throw new IllegalArgumentException("SheetName can't be null!");
-        } else if (sheetName.isEmpty()) {
-            throw new IllegalArgumentException("SheetName can't be empty!");
-        }
-        XSSFReader streamer = new XSSFReader(pack);
-        SheetIterator sheetIterator = (SheetIterator) streamer.getSheetsData();
-
-        while (sheetIterator.hasNext()) {
-            sheetIterator.next();
-            if (sheetIterator.getSheetName().contentEquals(sheetName)) {
-                return sheetIterator;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Fetch the {@link SheetIterator} by its index, index is zero based.
-     *
-     * @param index
-     * @return The sheet if found, null otherwise.
-     * @throws IOException
-     * @throws SAXException
-     * @throws OpenXML4JException
-     */
-    public SheetIterator getSheetByIndex(int index) throws IOException, SAXException, OpenXML4JException {
-        if (index < 0) {
-            throw new IllegalArgumentException("Index must be higher than -1!");
-        }
-        
-        XSSFReader streamer = new XSSFReader(pack);
-        SheetIterator sheetIterator = (SheetIterator) streamer.getSheetsData();
-        int currentIndex = 0;
-
-        while (sheetIterator.hasNext()) {
-            sheetIterator.next();
-            if (currentIndex == index) {
-                return sheetIterator;
-            }
-            currentIndex++;
-        }
-
-        return null;
-    }
-
-    /**
      * Fetch the index of the sheet by its name.
      *
      * @param sheetName

@@ -14,5 +14,10 @@ public abstract class DefaultCallback implements DataCallback{
 
     @Override
     public void onEnd() {}
-    
+
+    @Override
+    public void onSheetBegin() {}
+
+    @Override
+    public void onSheetEnd() {}
 }

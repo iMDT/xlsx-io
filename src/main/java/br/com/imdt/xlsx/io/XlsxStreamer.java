@@ -1,5 +1,6 @@
 package br.com.imdt.xlsx.io;
 
+import br.com.imdt.xlsx.io.exception.SheetNotFoundException;
 import br.com.imdt.xlsx.io.impl.ContentHandlerImpl;
 import java.io.Closeable;
 import java.io.File;
@@ -26,10 +27,12 @@ import org.xml.sax.XMLReader;
  *
  * @author <a href="github.com/klauswk">Klaus Klein</a>
  */
-public class XlsxStreamer implements Closeable {
+public class XlsxStreamer implements Streamer, Closeable {
 
     private DataCallback dataCallback;
     private OPCPackage pack;
+    
+    public boolean ignoreEmptyRow = true;
 
     private XlsxStreamer(DataCallback dataCallback) {
         this.dataCallback = dataCallback;
@@ -50,28 +53,12 @@ public class XlsxStreamer implements Closeable {
         this.pack = OPCPackage.open(inputStream);
     }
 
-    /**
-     * Stream all sheets presented in the document.
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws OpenXML4JException
-     * @throws ParserConfigurationException
-     */
-    public void stream() throws IOException, SAXException, OpenXML4JException, ParserConfigurationException {
-        ReadOnlySharedStringsTable sharedStringsTable = new ReadOnlySharedStringsTable(pack);
-        XSSFReader streamer = new XSSFReader(pack);
-        StylesTable styles = streamer.getStylesTable();
-        SheetIterator sheetIterator = (SheetIterator) streamer.getSheetsData();
-        dataCallback.onBegin();
-        int sheetNumber = 1;
-        while (sheetIterator.hasNext()) {
-            InputStream stream = sheetIterator.next();
-            processSheet(styles, sharedStringsTable, stream, sheetNumber);
-            stream.close();
-            sheetNumber++;
-        }
-        dataCallback.onEnd();
+    public boolean isIgnoringEmptyRows() {
+        return ignoreEmptyRow;
+    }
+
+    public void setIgnoreEmptyRow(boolean ignoreEmptyRow) {
+        this.ignoreEmptyRow = ignoreEmptyRow;
     }
 
     /**
@@ -81,6 +68,10 @@ public class XlsxStreamer implements Closeable {
      * @param styles
      * @param strings
      * @param sheetInputStream
+     * @param sheetNumber
+     * @throws java.io.IOException
+     * @throws javax.xml.parsers.ParserConfigurationException
+     * @throws org.xml.sax.SAXException
      */
     public void processSheet(
             StylesTable styles,
@@ -92,11 +83,100 @@ public class XlsxStreamer implements Closeable {
         SAXParserFactory saxFactory = SAXParserFactory.newInstance();
         SAXParser saxParser = saxFactory.newSAXParser();
         XMLReader sheetParser = saxParser.getXMLReader();
-        ContentHandler handler = new ContentHandlerImpl(sheetNumber, dataCallback, styles, strings, null);
+        ContentHandler handler = new ContentHandlerImpl(sheetNumber, dataCallback, styles, strings, null,ignoreEmptyRow);
         sheetParser.setContentHandler(handler);
         sheetParser.parse(sheetSource);
     }
 
+    /**
+     * Call
+     * {@link #processSheet(org.apache.poi.xssf.model.StylesTable, org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable, java.io.InputStream, int)}
+     * with the given stream.
+     *
+     * @param streamer
+     * @param stream
+     * @param sheetNumber
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws InvalidFormatException
+     * @throws SAXException
+     */
+    private void streamSheet(XSSFReader streamer, InputStream stream, int sheetNumber) throws IOException, ParserConfigurationException, InvalidFormatException, SAXException {
+        ReadOnlySharedStringsTable sharedStringsTable = new ReadOnlySharedStringsTable(pack);
+        StylesTable styles = streamer.getStylesTable();
+        dataCallback.onSheetBegin();
+        processSheet(styles, sharedStringsTable, stream, sheetNumber);
+        dataCallback.onSheetEnd();
+        stream.close();
+    }
+
+    @Override
+    public void stream() throws IOException, SAXException, OpenXML4JException, ParserConfigurationException {
+        
+        XSSFReader streamer = new XSSFReader(pack);
+        SheetIterator sheetIterator = (SheetIterator) streamer.getSheetsData();
+        dataCallback.onBegin();
+        int sheetNumber = 1;
+        while (sheetIterator.hasNext()) {
+            streamSheet(streamer, sheetIterator.next(), sheetNumber);
+            sheetNumber++;
+        }
+        dataCallback.onEnd();
+    }
+
+    @Override
+    public void streamSheetByName(String sheetName) throws IOException, SAXException, OpenXML4JException, ParserConfigurationException, SheetNotFoundException {
+        if (sheetName == null) {
+            throw new IllegalArgumentException("SheetName can't be null!");
+        } else if (sheetName.isEmpty()) {
+            throw new IllegalArgumentException("SheetName can't be empty!");
+        }
+        XSSFReader streamer = new XSSFReader(pack);
+        SheetIterator sheetIterator = (SheetIterator) streamer.getSheetsData();
+
+        int sheetNumber = 0;
+        InputStream stream;
+
+        while (sheetIterator.hasNext()) {
+            stream = sheetIterator.next();
+            if (sheetIterator.getSheetName().contentEquals(sheetName)) {
+                dataCallback.onBegin();
+                streamSheet(streamer, stream, sheetNumber);
+                dataCallback.onEnd();
+                return;
+            }
+            sheetNumber++;
+        }
+        throw new SheetNotFoundException(sheetName);
+    }
+
+    @Override
+    public void streamSheetByIndex(int index) throws IOException, SAXException, OpenXML4JException, ParserConfigurationException, SheetNotFoundException {
+        if (index < 0) {
+            throw new IllegalArgumentException("Index must be higher than -1!");
+        }
+
+        XSSFReader streamer = new XSSFReader(pack);
+        SheetIterator sheetIterator = (SheetIterator) streamer.getSheetsData();
+        int sheetNumber = 0;
+        InputStream stream;
+
+        while (sheetIterator.hasNext()) {
+            stream = sheetIterator.next();
+
+            if (sheetNumber == index) {
+                dataCallback.onBegin();
+                streamSheet(streamer, stream, sheetNumber);
+                dataCallback.onEnd();
+                return;
+            }
+            sheetNumber++;
+        }
+
+        throw new SheetNotFoundException(index);
+    }
+
+    @Override
     public void close() throws IOException {
         pack.close();
     }

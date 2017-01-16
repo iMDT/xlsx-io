@@ -4,7 +4,7 @@ import br.com.imdt.xlsx.io.DataCallback;
 import br.com.imdt.xlsx.io.DataHandler;
 import br.com.imdt.xlsx.io.XlsxDataType;
 import br.com.imdt.xlsx.io.XlsxDataTypeService;
-import java.util.ArrayList;
+import br.com.imdt.xlsx.io.XlsxUtils;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.model.StylesTable;
@@ -45,6 +45,11 @@ public class ContentHandlerImpl extends DefaultHandler {
      * Points the number of rows readed.
      */
     private long rowNumber = 0;
+
+    /**
+     * Points the last readed row.
+     */
+    private long lastRowNumber = 0;
 
     /**
      * The data callback used to inform when an sheet started or finished been
@@ -91,6 +96,8 @@ public class ContentHandlerImpl extends DefaultHandler {
 
     private final XlsxDataTypeService dataTypeService;
 
+    public final boolean ignoreEmptyRow;
+
     @Override
     public void startElement(String uri, String localName, String name,
             Attributes attributes) throws SAXException {
@@ -107,14 +114,36 @@ public class ContentHandlerImpl extends DefaultHandler {
             xSSFCellStyle = null;
             this.xlsxDataType = XlsxDataType.NUMBER;
             cellReference = attributes.getValue("r");
+
+            if (XlsxUtils.isFirstColumn(cellReference)) {
+                rowNumber = XlsxUtils.getRowNumber(cellReference);
+
+                if ((lastRowNumber + 1) == rowNumber) {
+                    lastRowNumber = rowNumber;
+                } else {
+                    addMissingRows();
+                }
+            }
             String cellType = attributes.getValue("t");
             String cellStyleStr = attributes.getValue("s");
-            
+
             xlsxDataType = dataTypeService.getByCellType(cellType);
 
             if (cellStyleStr != null) {
                 int styleIndex = Integer.parseInt(cellStyleStr);
                 xSSFCellStyle = stylesTable.getStyleAt(styleIndex);
+            }
+        }
+    }
+
+    /**
+     * Adds the missing rows in the callBack
+     */
+    private void addMissingRows() {
+        if (!ignoreEmptyRow) {
+            while ((lastRowNumber + 1) < rowNumber) {
+                dataCallback.onRow(sheetNumber, lastRowNumber, rawValues, formattedValues);
+                lastRowNumber++;
             }
         }
     }
@@ -166,10 +195,22 @@ public class ContentHandlerImpl extends DefaultHandler {
                     break;
             }
         } else if (XlsxDataType.ROW.getCellType().equals(name)) {
-            dataCallback.onRow(sheetNumber, rowNumber++, rawValues, formattedValues);
-            this.currentCol = -1;
-            rawValues.clear();
-            formattedValues.clear();
+            if (ignoreEmptyRow) {
+                if (!dataTypeService.isRowEmpty(rawValues)) {
+                    dataCallback.onRow(sheetNumber, rowNumber, rawValues, formattedValues);
+                    this.currentCol = -1;
+                    rawValues.clear();
+                    formattedValues.clear();
+                } else {
+                    rawValues.clear();
+                    formattedValues.clear();
+                }
+            } else {
+                dataCallback.onRow(sheetNumber, rowNumber, rawValues, formattedValues);
+                this.currentCol = -1;
+                rawValues.clear();
+                formattedValues.clear();
+            }
         }
     }
 
@@ -189,13 +230,14 @@ public class ContentHandlerImpl extends DefaultHandler {
      * @param styles Table of styles
      * @param sharedStringsTable Table of shared strings
      * @param dataHandler The handler to be delivered when data cell is ready to
+     * @param ignoreEmptyRow If it should ignore missing/empty rows.
      * be used
      */
     public ContentHandlerImpl(long sheetNumber,
             DataCallback dataCallback,
             StylesTable styles,
             ReadOnlySharedStringsTable sharedStringsTable,
-            DataHandler dataHandler) {
+            DataHandler dataHandler,boolean ignoreEmptyRow) {
 
         this.stylesTable = styles;
         this.sharedStringsTable = sharedStringsTable;
@@ -211,5 +253,6 @@ public class ContentHandlerImpl extends DefaultHandler {
         } else {
             this.dataHandler = dataHandler;
         }
+        this.ignoreEmptyRow = ignoreEmptyRow;
     }
 }

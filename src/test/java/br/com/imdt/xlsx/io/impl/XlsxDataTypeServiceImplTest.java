@@ -2,6 +2,7 @@ package br.com.imdt.xlsx.io.impl;
 
 import br.com.imdt.xlsx.io.XlsxDataType;
 import br.com.imdt.xlsx.io.XlsxDataTypeService;
+import java.util.ArrayList;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -63,5 +64,35 @@ public class XlsxDataTypeServiceImplTest {
         for (XlsxDataType type : XlsxDataType.values()) {
             assertEquals(type, dataTypeService.getByCellType(type.getCellType()));
         }
+    }
+
+    @Test
+    public void testIsEmptyRow() {
+        ArrayList<String> notEmptyList = new ArrayList<String>(10);
+
+        notEmptyList.add(null);
+        notEmptyList.add(" ");
+        notEmptyList.add("123");
+        notEmptyList.add("das");
+        notEmptyList.add("dasdas");
+        notEmptyList.add("fsa4d5f");
+        notEmptyList.add("");
+        notEmptyList.add("fsdf45s");
+        notEmptyList.add("dsf45das");
+        notEmptyList.add("5sa45sd");
+        
+        ArrayList<String> emptyList = new ArrayList<String>(10);
+
+        assertFalse(dataTypeService.isRowEmpty(notEmptyList));
+        notEmptyList.clear();
+        
+        assertTrue(dataTypeService.isRowEmpty(emptyList));
+        
+        emptyList.add(null);
+        emptyList.add(null);
+        emptyList.add("");
+        emptyList.add(" ");
+        emptyList.add("    ");
+        assertTrue(dataTypeService.isRowEmpty(emptyList));
     }
 }

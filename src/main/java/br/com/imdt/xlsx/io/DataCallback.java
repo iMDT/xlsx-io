@@ -15,6 +15,11 @@ public interface DataCallback {
     public void onBegin();
     
     /**
+     * Called when an sheet has begin to be read.
+     */
+    public void onSheetBegin();
+    
+    /**
      * Called when an row has finished been readed.
      * @param sheetNumber
      * @param rowNum
@@ -22,6 +27,11 @@ public interface DataCallback {
      * @param formattedValues 
      */
     public void onRow(Long sheetNumber,Long rowNum,ArrayList<String> rawValues, ArrayList<String> formattedValues);
+    
+    /**
+     * Called when an sheet has ended to be read.
+     */
+    public void onSheetEnd();
     
     /**
      * Called when the documented has ended being read

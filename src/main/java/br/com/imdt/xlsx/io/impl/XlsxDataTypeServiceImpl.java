@@ -9,17 +9,18 @@ import static br.com.imdt.xlsx.io.XlsxDataType.ODD_FOOTER;
 import static br.com.imdt.xlsx.io.XlsxDataType.ODD_HEADER;
 import static br.com.imdt.xlsx.io.XlsxDataType.NUMBER;
 import br.com.imdt.xlsx.io.XlsxDataTypeService;
+import java.util.List;
 
 /**
- * 
+ *
  * @author <a href="github.com/klauswk">Klaus Klein</a>
  */
 public class XlsxDataTypeServiceImpl implements XlsxDataTypeService {
-    
+
     @Override
     public XlsxDataType getByCellType(String cellType) {
-        for(XlsxDataType type : XlsxDataType.values()){
-            if(type.getCellType().equalsIgnoreCase(cellType)){
+        for (XlsxDataType type : XlsxDataType.values()) {
+            if (type.getCellType().equalsIgnoreCase(cellType)) {
                 return type;
             }
         }
@@ -42,5 +43,17 @@ public class XlsxDataTypeServiceImpl implements XlsxDataTypeService {
         }
         return "v".equals(textType) || "inlineStr".equals(textType) || "t".equals(textType) && isIsOpen;
     }
-    
+
+    @Override
+    public boolean isRowEmpty(List<String> list) {
+        String obj;
+        for (int i = 0, j = list.size(); i < j; i++) {
+            obj = list.get(i);
+            if (obj != null && !obj.trim().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
